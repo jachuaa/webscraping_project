@@ -4,16 +4,20 @@ from urllib.parse import urljoin
 import pandas as pd
 import time
 
-# Patterns to match in img src attributes
+# Patterns to match in img attributes
 patterns = [
     "https://www.pursuitcollection.com",
     "https://pursuitcollection.com",
-    "/Website/media/pursuit/"
+    "/Website/media/pursuit/",
+    "/styles/themes/"
 ]
 
+# File extensions to look for
+valid_extensions = ('.svg', '.jpeg', '.jpg', '.png', '.gif')
+
 # Load the CSV file containing the URLs
-input_csv = "C:\\Users\\jachua\\OneDrive - Viad Corp\\Desktop\\webscraping\\BJC url list.csv" # Ensure this file is in the same folder
-output_csv = 'found_images_BJC3.csv'
+input_csv = "C:\\Users\\jachua\\OneDrive - Viad Corp\\Desktop\\webscraping\\Style Paths url list.csv"
+output_csv = 'found_images_1.csv'
 
 # Read the CSV file to get the list of URLs
 df = pd.read_csv(input_csv)
@@ -30,11 +34,12 @@ def find_matching_images(url):
         matching_images = []
 
         for img in img_tags:
-            src = img.get('src', '')
-            if any(pattern in src for pattern in patterns):
-                # Convert relative URLs to absolute URLs
-                full_url = urljoin(url, src)
-                matching_images.append(full_url)
+            # Check all attributes of the img tag
+            for attr, value in img.attrs.items():
+                if isinstance(value, str) and any(pattern in value for pattern in patterns) and value.lower().endswith(valid_extensions):
+                    # Convert relative URLs to absolute URLs
+                    full_url = urljoin(url, value)
+                    matching_images.append(full_url)
 
         return matching_images
 
@@ -56,4 +61,5 @@ for url in urls:
 output_df = pd.DataFrame(results)
 output_df.to_csv(output_csv, index=False)
 
-print('\nScraping complete! Results saved to found_images_BJC3.csv')
+print('\nScraping complete! Results saved to found_images_1.csv')
+
